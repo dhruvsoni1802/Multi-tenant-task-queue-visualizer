@@ -8,8 +8,8 @@ let _id = 0
 function mkTask(tenant) { return { id: _id++, tenant } }
 
 const INITIAL = [
-  mkTask('alice'), mkTask('alice'),
   ...Array.from({ length: 8 }, () => mkTask('bob')),
+  mkTask('alice'), mkTask('alice'),
   mkTask('carol'),
 ]
 
@@ -40,38 +40,16 @@ export default function FifoSection() {
 
   const aliceInQueue = queue.filter(t => t.tenant === 'alice').length
   const bobInQueue   = queue.filter(t => t.tenant === 'bob').length
-  const aliceDone    = processed.filter(t => t.tenant === 'alice').length
 
   return (
     <div>
       <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: '-0.01em' }}>
         FIFO — First In, First Out
       </h2>
-      <p style={{ color: 'var(--text-2)', marginBottom: 28, maxWidth: 560 }}>
-        Tasks are processed in arrival order. When Bob enqueues 8 tasks before Alice,
-        Alice waits until every one of Bob's finishes — even if her job is tiny.
-        This is called <strong style={{ color: 'var(--text-1)', fontWeight: 500 }}>starvation</strong>.
+      <p style={{ color: 'var(--text-2)', marginBottom: 24, maxWidth: 560 }}>
+        Tasks are processed in arrival order. Bob's 8 tasks arrived first — Alice is stuck waiting
+        behind all of them. Hit <em>Process next</em> to see her wait. Try <em>Bob uploads 6 files</em> to make it worse.
       </p>
-
-      {/* stat row */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 28 }}>
-        {[
-          { label: "Queue length", value: queue.length },
-          { label: "Alice waiting", value: aliceInQueue, warn: aliceInQueue > 0 },
-          { label: "Bob waiting",   value: bobInQueue },
-          { label: "Alice processed", value: aliceDone },
-        ].map(s => (
-          <div key={s.label} style={{
-            flex: 1, padding: '12px 14px',
-            background: s.warn ? 'var(--carol-bg)' : 'var(--bg-2)',
-            border: `1px solid ${s.warn ? 'var(--carol-border)' : 'var(--border)'}`,
-            borderRadius: 'var(--radius-md)',
-          }}>
-            <div style={{ fontSize: 11, color: s.warn ? 'var(--carol)' : 'var(--text-3)', marginBottom: 4 }}>{s.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 600, color: s.warn ? 'var(--carol)' : 'var(--text-1)' }}>{s.value}</div>
-          </div>
-        ))}
-      </div>
 
       {/* queue visualization */}
       <div style={{
@@ -139,7 +117,7 @@ export default function FifoSection() {
         <div style={{ flex: 1 }} />
         <button onClick={dequeue} disabled={queue.length === 0} style={{
           padding: '8px 20px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-          border: '1px solid var(--text-1)', background: 'var(--text-1)', color: '#fff',
+          border: '1px solid var(--text-1)', background: 'var(--text-1)', color: 'var(--bg)',
           opacity: queue.length === 0 ? 0.4 : 1,
         }}>
           Process next
@@ -152,15 +130,6 @@ export default function FifoSection() {
         </button>
       </div>
 
-      {/* insight */}
-      <div style={{ marginTop: 32, padding: '16px 20px', borderRadius: 'var(--radius-md)', background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Why this matters</div>
-        <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.7 }}>
-          In a real SaaS product, Bob could be one power user uploading thousands of files,
-          while Alice is a free-tier user uploading one PDF. With FIFO, Alice waits for <em>all</em> of
-          Bob's work to finish. The fix: process one task per tenant in rotation — round-robin.
-        </p>
-      </div>
     </div>
   )
 }

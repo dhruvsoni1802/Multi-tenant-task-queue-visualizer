@@ -22,16 +22,43 @@ export default function App() {
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '40px 24px 80px' }}>
 
       {/* header */}
-      <div style={{ marginBottom: 48 }}>
-        <p style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 8 }}>
-          Interactive explainer
-        </p>
-        <h1 style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 8 }}>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 6 }}>
           Fair multi-tenant queues
         </h1>
-        <p style={{ color: 'var(--text-2)', fontSize: 15 }}>
-          How Postgres-backed task queues handle fairness — and what goes wrong along the way.
+        <p style={{ color: 'var(--text-2)', fontSize: 14 }}>
+          A walkthrough of how task queues can starve tenants — and how to fix it.
         </p>
+      </div>
+
+      {/* context */}
+      <div style={{
+        marginBottom: 36, padding: '18px 22px',
+        background: 'var(--bg-2)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
+      }}>
+        <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.7, marginBottom: 16 }}>
+          Three customers share the same pool of background workers.
+          Bob is a power user — he queues a lot of tasks at once.
+          With a naive queue, his jobs can completely block Alice and Carol,
+          even if they only have one task each.
+        </p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {[
+            { t: 'alice', label: 'Alice', note: 'light user — 1–2 tasks' },
+            { t: 'bob',   label: 'Bob',   note: 'power user — floods the queue' },
+            { t: 'carol', label: 'Carol', note: 'light user — 1 task' },
+          ].map(({ t, label, note }) => (
+            <div key={t} style={{
+              flex: 1, minWidth: 120, padding: '10px 14px',
+              background: `var(--${t}-bg)`, border: `1px solid var(--${t}-border)`,
+              borderRadius: 'var(--radius-md)',
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: `var(--${t})`, marginBottom: 2 }}>{label}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{note}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* step nav */}
@@ -48,7 +75,7 @@ export default function App() {
                 ? '1.5px solid var(--text-1)'
                 : '1px solid var(--border)',
               background: i === step ? 'var(--text-1)' : 'var(--bg)',
-              color: i === step ? '#fff' : i < step ? 'var(--text-2)' : 'var(--text-1)',
+              color: i === step ? 'var(--bg)' : i < step ? 'var(--text-2)' : 'var(--text-1)',
               fontSize: 12,
               fontWeight: 500,
               textAlign: 'left',
@@ -60,17 +87,6 @@ export default function App() {
             <div style={{ lineHeight: 1.3 }}>{s.label}</div>
           </button>
         ))}
-      </div>
-
-      {/* section label */}
-      <div style={{ marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-        <span style={{
-          fontSize: 11, letterSpacing: '0.07em', textTransform: 'uppercase',
-          color: 'var(--text-3)', marginRight: 12
-        }}>
-          Step {step + 1} of {STEPS.length}
-        </span>
-        <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{STEPS[step].subtitle}</span>
       </div>
 
       {/* active section */}
@@ -102,7 +118,7 @@ export default function App() {
           style={{
             padding: '10px 20px', borderRadius: 'var(--radius-md)',
             border: '1px solid var(--text-1)', fontSize: 14,
-            color: '#fff', background: 'var(--text-1)',
+            color: 'var(--bg)', background: 'var(--text-1)',
             opacity: step === STEPS.length - 1 ? 0.4 : 1,
           }}
         >

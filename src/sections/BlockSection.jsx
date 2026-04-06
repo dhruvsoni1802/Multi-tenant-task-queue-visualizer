@@ -110,19 +110,11 @@ export default function BlockSection() {
       <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: '-0.01em' }}>
         Write-time fix: block sequencing
       </h2>
-      <p style={{ color: 'var(--text-2)', marginBottom: 12, maxWidth: 580 }}>
-        Instead of sorting at read time, assign task IDs at <em>write time</em> using a block-based algorithm.
-        Divide the ID space into blocks of size <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13, background: 'var(--bg-3)', padding: '1px 5px', borderRadius: 3 }}>B</code>.
-        Each tenant gets one slot per block. The natural <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13, background: 'var(--bg-3)', padding: '1px 5px', borderRadius: 3 }}>ORDER BY id</code> is already round-robin.
+      <p style={{ color: 'var(--text-2)', marginBottom: 24, maxWidth: 580 }}>
+        Assign IDs at <em>write time</em> so a plain <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>ORDER BY id</code> is already round-robin.
+        Each tenant gets one slot per block: <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--bg-3)', padding: '1px 5px', borderRadius: 3 }}>id = group_id + block_size × block_ptr</code>.
+        Add tasks and watch the grid fill in interleaved order.
       </p>
-
-      <div style={{
-        padding: '10px 16px', borderRadius: 'var(--radius-md)', marginBottom: 24,
-        background: 'var(--alice-bg)', border: '1px solid var(--alice-border)',
-        fontSize: 13, color: 'var(--alice)', fontFamily: 'var(--font-mono)',
-      }}>
-        task_id = group_numeric_id + block_length × block_pointer
-      </div>
 
       {/* block grid */}
       <div style={{
@@ -257,7 +249,7 @@ export default function BlockSection() {
         <div style={{ flex: 1 }} />
         <button onClick={dequeue} disabled={state.tasks.length === 0} style={{
           padding: '8px 20px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-          border: '1px solid var(--text-1)', background: 'var(--text-1)', color: '#fff',
+          border: '1px solid var(--text-1)', background: 'var(--text-1)', color: 'var(--bg)',
           opacity: state.tasks.length === 0 ? 0.4 : 1,
         }}>
           Process next
@@ -270,22 +262,6 @@ export default function BlockSection() {
         </button>
       </div>
 
-      <div style={{ marginTop: 32, display: 'flex', gap: 12 }}>
-        {[
-          { icon: '⚡', label: 'Constant-time reads', desc: 'ORDER BY id scans only as many rows as the LIMIT — no window function.' },
-          { icon: '🔒', label: 'No lock contention', desc: 'Workers select non-overlapping IDs naturally. No CTE snapshot problem.' },
-          { icon: '✍️', label: 'Slightly slower writes', desc: 'Must update block pointer on insert. Still constant-time; ~500–1k/sec.' },
-        ].map(c => (
-          <div key={c.label} style={{
-            flex: 1, padding: '14px 16px', borderRadius: 'var(--radius-md)',
-            background: 'var(--bg-2)', border: '1px solid var(--border)',
-          }}>
-            <div style={{ fontSize: 16, marginBottom: 6 }}>{c.icon}</div>
-            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>{c.label}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>{c.desc}</div>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }

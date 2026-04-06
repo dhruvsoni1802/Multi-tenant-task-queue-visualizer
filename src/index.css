@@ -1,29 +1,29 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #ffffff;
-  --bg-2: #f8f8f6;
-  --bg-3: #f0f0ec;
-  --border: #e2e2dc;
-  --border-2: #cacac4;
-  --text-1: #1a1a18;
-  --text-2: #6b6b66;
-  --text-3: #9b9b96;
+  --bg: #0c0c0c;
+  --bg-2: #161616;
+  --bg-3: #202020;
+  --border: #2a2a2a;
+  --border-2: #3a3a3a;
+  --text-1: #f0f0f0;
+  --text-2: #888888;
+  --text-3: #505050;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --font: 'DM Sans', system-ui, sans-serif;
   --font-mono: 'DM Mono', 'Fira Mono', monospace;
 
-  --alice: #2563eb;
-  --alice-bg: #eff6ff;
-  --alice-border: #bfdbfe;
-  --bob: #16a34a;
-  --bob-bg: #f0fdf4;
-  --bob-border: #bbf7d0;
-  --carol: #dc2626;
-  --carol-bg: #fef2f2;
-  --carol-border: #fecaca;
+  --alice: #60a5fa;
+  --alice-bg: rgba(96, 165, 250, 0.1);
+  --alice-border: rgba(96, 165, 250, 0.25);
+  --bob: #4ade80;
+  --bob-bg: rgba(74, 222, 128, 0.1);
+  --bob-border: rgba(74, 222, 128, 0.25);
+  --carol: #f87171;
+  --carol-bg: rgba(248, 113, 113, 0.1);
+  --carol-border: rgba(248, 113, 113, 0.25);
 }
 
 html, body, #root {

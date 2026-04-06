@@ -91,10 +91,9 @@ export default function ConcurrencySection() {
       <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: '-0.01em' }}>
         Concurrency limits per tenant
       </h2>
-      <p style={{ color: 'var(--text-2)', marginBottom: 28, maxWidth: 580 }}>
-        Even with fair ordering, a single tenant could fill all worker slots.
-        Add a per-tenant concurrency cap: a tenant can't use more than <em>N</em> slots at once,
-        no matter how many tasks are queued. This is a simple range filter on the block ID.
+      <p style={{ color: 'var(--text-2)', marginBottom: 24, maxWidth: 580 }}>
+        Even with fair ordering, one tenant could grab every worker slot.
+        Use the sliders to set a global limit and a per-tenant cap, then dispatch and complete tasks.
       </p>
 
       {/* sliders */}
@@ -137,7 +136,7 @@ export default function ConcurrencySection() {
             return [
               <div key={`${tenant}-name`} style={{ fontSize: 13, fontWeight: 500, color: c.text, paddingRight: 8, display: 'flex', alignItems: 'center' }}>
                 {tenant[0].toUpperCase() + tenant.slice(1)}
-                {atCap && <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 5px', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 10, color: '#92400e' }}>cap</span>}
+                {atCap && <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 5px', background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 10, color: '#fbbf24' }}>cap</span>}
               </div>,
               <div key={`${tenant}-q`} style={{ textAlign: 'center', color: 'var(--text-1)' }}>{queued}</div>,
               <div key={`${tenant}-r`} style={{ textAlign: 'center', fontWeight: r > 0 ? 600 : 400, color: r > 0 ? c.text : 'var(--text-3)' }}>{r}</div>,
@@ -202,7 +201,7 @@ export default function ConcurrencySection() {
           disabled={state.tasks.length === 0 || running.length >= limit}
           style={{
             padding: '8px 20px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-            border: '1px solid var(--text-1)', background: 'var(--text-1)', color: '#fff',
+            border: '1px solid var(--text-1)', background: 'var(--text-1)', color: 'var(--bg)',
             opacity: (state.tasks.length === 0 || running.length >= limit) ? 0.4 : 1,
           }}>
           Dispatch batch
@@ -215,16 +214,6 @@ export default function ConcurrencySection() {
         </button>
       </div>
 
-      <div style={{ marginTop: 32, padding: '16px 20px', borderRadius: 'var(--radius-md)', background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.07em' }}>How it works in SQL</div>
-        <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.7 }}>
-          Because blocks are contiguous, limiting concurrency is just a range filter:{' '}
-          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13, background: 'var(--bg-3)', padding: '1px 5px', borderRadius: 3 }}>
-            WHERE id &lt; min_queued_id + block_length × concurrency_cap
-          </code>.
-          No joins, no subqueries. Still constant-time.
-        </p>
-      </div>
     </div>
   )
 }

@@ -23,7 +23,7 @@ function partitionSort(tasks) {
   return [...ranked].sort((a, b) => a.rank !== b.rank ? a.rank - b.rank : a.id - b.id)
 }
 
-const WORKER_COLORS = ['#7c3aed', '#0369a1', '#b45309']
+const WORKER_COLORS = ['#a78bfa', '#38bdf8', '#fb923c']
 
 export default function PartitionSection() {
   const [queue, setQueue] = useState(INITIAL_QUEUE)
@@ -81,9 +81,9 @@ export default function PartitionSection() {
       <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: '-0.01em' }}>
         Read-time fix: <code style={{ fontFamily: 'var(--font-mono)', fontSize: 17, background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 4 }}>PARTITION BY</code>
       </h2>
-      <p style={{ color: 'var(--text-2)', marginBottom: 28, maxWidth: 580 }}>
-        At read time, assign each task a rank within its tenant group using a window function,
-        then sort by rank. This gives round-robin ordering — but introduces two serious problems.
+      <p style={{ color: 'var(--text-2)', marginBottom: 24, maxWidth: 580 }}>
+        Use a window function to rank tasks per tenant, then sort by rank — instant round-robin.
+        Click <em>Run PARTITION BY query</em> to see the reordering, then spot the two problems below.
       </p>
 
       <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
@@ -99,8 +99,8 @@ export default function PartitionSection() {
 
         {/* after partition */}
         <div style={{
-          flex: 1, background: showPartitioned ? '#fafff6' : 'var(--bg-2)',
-          border: `1px solid ${showPartitioned ? '#bbf7d0' : 'var(--border)'}`,
+          flex: 1, background: showPartitioned ? 'var(--bob-bg)' : 'var(--bg-2)',
+          border: `1px solid ${showPartitioned ? 'var(--bob-border)' : 'var(--border)'}`,
           borderRadius: 'var(--radius-lg)', padding: '14px 18px',
           transition: 'all 0.3s',
           position: 'relative', overflow: 'hidden',
@@ -138,52 +138,33 @@ export default function PartitionSection() {
 
       {/* problem 1: full scan */}
       <div style={{
-        padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: 16,
-        background: '#fffbeb', border: '1px solid #fde68a',
+        padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 12,
+        background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)',
       }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: '#92400e', marginBottom: 4 }}>
+        <div style={{ fontSize: 12, fontWeight: 500, color: '#fbbf24', marginBottom: 3 }}>
           Problem 1 — Full table scan
         </div>
-        <p style={{ fontSize: 13, color: '#78350f', lineHeight: 1.6 }}>
-          The window function must read <strong>every QUEUED row</strong> to compute ranks.
-          At 10,000 tasks it's fine. At 25,000+ tasks, the query time exceeds the polling interval
-          — workers start missing tasks, the backlog grows, and the system becomes <em>unrecoverable</em>.
+        <p style={{ fontSize: 13, color: '#d97706', lineHeight: 1.5 }}>
+          The window function must read <strong>every queued row</strong> to assign ranks.
+          At 25k+ tasks the query time exceeds the polling interval — the backlog never drains.
         </p>
-        <div style={{ marginTop: 10, display: 'flex', gap: 8, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-          {[
-            { rows: '1k',  ms: '12ms',  ok: true  },
-            { rows: '10k', ms: '89ms',  ok: true  },
-            { rows: '25k', ms: '380ms', ok: false },
-            { rows: '50k', ms: '820ms', ok: false },
-          ].map(r => (
-            <div key={r.rows} style={{
-              padding: '6px 10px', borderRadius: 6,
-              background: r.ok ? '#f0fdf4' : '#fef2f2',
-              border: `1px solid ${r.ok ? '#bbf7d0' : '#fecaca'}`,
-              color: r.ok ? '#15803d' : '#dc2626',
-            }}>
-              {r.rows} rows → {r.ms}
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* problem 2: concurrency */}
       <div style={{
         padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: 24,
-        background: '#fef2f2', border: '1px solid #fecaca',
+        background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
       }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: '#991b1b', marginBottom: 4 }}>
+        <div style={{ fontSize: 12, fontWeight: 500, color: '#f87171', marginBottom: 4 }}>
           Problem 2 — Concurrency deadlock
         </div>
-        <p style={{ fontSize: 13, color: '#7f1d1d', lineHeight: 1.6, marginBottom: 12 }}>
-          The CTE snapshots the partition before applying <code style={{ fontFamily: 'var(--font-mono)' }}>SKIP LOCKED</code>.
-          When 3 workers run simultaneously, they all read the same CTE — workers 2 and 3 try to lock rows
-          that worker 1 already holds. They get 0 tasks.
+        <p style={{ fontSize: 13, color: '#fca5a5', lineHeight: 1.5, marginBottom: 12 }}>
+          The CTE snapshots the ranked list before <code style={{ fontFamily: 'var(--font-mono)' }}>SKIP LOCKED</code> runs.
+          All 3 workers read the same snapshot and race for the same rows — workers 2 and 3 get nothing.
         </p>
         <button onClick={simulateConcurrency} style={{
           padding: '7px 14px', borderRadius: 'var(--radius-md)', fontSize: 13,
-          border: '1px solid #fecaca', background: '#fff5f5', color: '#dc2626', fontWeight: 500,
+          border: '1px solid var(--carol-border)', background: 'var(--carol-bg)', color: 'var(--carol)', fontWeight: 500,
         }}>
           Simulate 3 workers polling at once
         </button>
@@ -193,7 +174,7 @@ export default function PartitionSection() {
             {workerLogs.map((log, wi) => (
               <div key={wi} style={{
                 flex: 1, padding: '10px 12px', borderRadius: 8,
-                background: '#fff', border: '1px solid var(--border)',
+                background: 'var(--bg-3)', border: '1px solid var(--border)',
               }}>
                 <div style={{ fontSize: 11, fontWeight: 500, color: WORKER_COLORS[wi], marginBottom: 6 }}>
                   Worker {wi + 1}
@@ -220,7 +201,7 @@ export default function PartitionSection() {
       <div style={{ display: 'flex', gap: 10 }}>
         <button onClick={processRoundRobin} disabled={queue.length === 0 || !showPartitioned} style={{
           padding: '8px 20px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-          border: '1px solid var(--text-1)', background: 'var(--text-1)', color: '#fff',
+          border: '1px solid var(--text-1)', background: 'var(--text-1)', color: 'var(--bg)',
           opacity: queue.length === 0 || !showPartitioned ? 0.4 : 1,
         }}>
           Process batch (round-robin)
@@ -233,13 +214,6 @@ export default function PartitionSection() {
         </button>
       </div>
 
-      <div style={{ marginTop: 32, padding: '16px 20px', borderRadius: 'var(--radius-md)', background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.07em' }}>The takeaway</div>
-        <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.7 }}>
-          Solving fairness at read time is tempting but fragile — it fails under load and under concurrency.
-          The real fix is to make the queue <em>already fair</em> at write time, so reads stay a simple <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>ORDER BY id LIMIT n</code>.
-        </p>
-      </div>
     </div>
   )
 }
