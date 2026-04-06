@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import './index.css'
-import FifoSection    from './sections/FifoSection'
+import FifoSection from './sections/FifoSection'
 import PartitionSection from './sections/PartitionSection'
-import BlockSection   from './sections/BlockSection'
+import BlockSection from './sections/BlockSection'
 import ConcurrencySection from './sections/ConcurrencySection'
 
 const STEPS = [

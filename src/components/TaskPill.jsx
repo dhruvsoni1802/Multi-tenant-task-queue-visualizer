@@ -16,7 +16,7 @@ export default function TaskPill({ tenant, id, dim }) {
       transition: 'opacity 0.3s',
       whiteSpace: 'nowrap',
     }}>
-      <span style={{ textTransform: 'capitalize' }}>{tenant[0].toUpperCase()}</span>
+      <span>{tenant[0].toUpperCase()}</span>
       <span style={{ opacity: 0.6 }}>#{id}</span>
     </div>
   )
